@@ -1,0 +1,25 @@
+/**
+ * All of the CSS for your admin-specific functionality should be
+ * included in this file.
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100;400;500;700&display=swap');
+
+#wpbody-content .woomio-admin-page h1, 
+#wpbody-content .woomio-admin-page h2, 
+#wpbody-content .woomio-admin-page h3, 
+#wpbody-content .woomio-admin-page h4, 
+#wpbody-content .woomio-admin-page p, 
+#wpbody-content .woomio-admin-page ul, 
+#wpbody-content .woomio-admin-page li, 
+#wpbody-content .woomio-admin-page a, 
+#wpbody-content .woomio-admin-page span {
+    font-family: 'Outfit', 'Open Sans', sans-serif;
+}
+
+#wpbody-content .woomio-admin-page h1, #wpbody-content .woomio-admin-page h2, #wpbody-content .woomio-admin-page h3, #wpbody-content .woomio-admin-page h4  {
+    font-weight: 700;
+    font-size: 26px;
+    color: #7F54B3;
+}
+
