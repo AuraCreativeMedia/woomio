@@ -16,7 +16,7 @@
  * Plugin Name:       WooMio
  * Plugin URI:        https://digitalzest.co.uk
  * Description:       Connects WooCommerce to Pabbly and further along, to Growmio. Modular switches that enable you to choose what data to send for marketing support.
- * Version:           1.0.0
+ * Version:           0.0.1
  * Author:            Digital Zest
  * Author URI:        https://digitalzest.co.uk/
  * License:           GPL-2.0+
@@ -35,7 +35,7 @@ if ( ! defined( 'WPINC' ) ) {
  * Start at version 1.0.0 and use SemVer - https://semver.org
  * Rename this for your plugin and update it as you release new versions.
  */
-define( 'WOOMIO_VERSION', '1.0.0' );
+define( 'WOOMIO_VERSION', '1.0.1' );
 
 /**
  * The code that runs during plugin activation.
@@ -79,4 +79,17 @@ function run_woomio() {
 	$plugin->run();
 
 }
+
 run_woomio();
+
+
+
+require 'plugin-update-checker/plugin-update-checker.php';
+use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
+
+$myUpdateChecker = PucFactory::buildUpdateChecker(
+	'https://github.com/AuraCreativeMedia/woomio/',
+	__FILE__,
+	'woomio'
+);
+
