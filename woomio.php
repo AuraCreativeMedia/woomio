@@ -16,7 +16,7 @@
  * Plugin Name:       WooMio
  * Plugin URI:        https://digitalzest.co.uk
  * Description:       Connects WooCommerce to Pabbly and further along, to Growmio. Modular switches that enable you to choose what data to send for marketing support.
- * Version:           0.0.1
+ * Version:           0.1.1
  * Author:            Digital Zest
  * Author URI:        https://digitalzest.co.uk/
  * License:           GPL-2.0+
