@@ -11,7 +11,7 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 == Description ==
 
-
+Connects WooCommerce to Pabbly and further along, to Growmio. Modular switches that enable you to choose what data to send for marketing support.
 
 == Installation ==
 
@@ -22,6 +22,9 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 == Changelog ==
 
+= 0.1.1 2023-10-18 =
+* 2nd Development Version - Basic testing, refinement of functions/layouts
+
 = 0.1.0 2023-10-02 =
-*
+* 1st Development Version - 4 modules added, connection to GHL confirmed
 
