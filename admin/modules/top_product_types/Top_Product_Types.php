@@ -236,6 +236,21 @@
         exit();
     }
 
+	public function get_woomio_top_pt_meta($user_id){
+		
+		// 2 TPT added to body obj
+		$user_top_types_unflat = $this->get_db_wp_user_data($user_id);
+		$user_top_types = $user_top_types_unflat[0] ?? [];
+
+		if ($user_top_types){
+			return $user_top_types;
+		} else {
+			return false;
+		}
+
+		
+	}
+
 
 
 

@@ -22,14 +22,22 @@
  */
 
 
-// [29-Sep-2023 09:22:58 UTC] PHP Fatal error:  require_once(): Failed opening required '/home/auracrea/public_html/superdev.auracreativemedia.co.uk/wp-content/plugins/woomio/modules/order-totals.php' (include_path='.:/opt/alt/php74/usr/share/pear') in /home/auracrea/public_html/superdev.auracreativemedia.co.uk/wp-content/plugins/woomio/admin/class-woomio-admin.php on line 26
-require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/modules/order-totals.php';
-require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/modules/top-product-types.php';
+require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/modules/Module_Config.php';
+
+require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/modules/order_totals/Order_Totals.php';
+require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/modules/top_product_types/Top_Product_Types.php';
+require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/modules/next_order_date/Next_Order_Date.php';
+require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/modules/new_release_products/New_Release_Products.php';
+
+require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/common/Form_Handlers.php';
+require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/common/Utility_Functions.php';
+
 
 
 class Woomio_Admin {
 
-	use Order_Totals_Module, Top_Products_Module;
+	use Order_Totals_Module, Top_Products_Module, Next_Order_Date, New_Release_Module,
+	Form_Handlers, Utility_Functions, Module_Config;
 
 	private $plugin_name;
 	private $version;
@@ -42,25 +50,12 @@ class Woomio_Admin {
 	}
 
 
-
 	/**
 	 * Register the stylesheets for the admin area.
 	 *
 	 * @since    1.0.0
 	 */
 	public function enqueue_styles() {
-
-		/**
-		 * This function is provided for demonstration purposes only.
-		 *
-		 * An instance of this class should be passed to the run() function
-		 * defined in Woomio_Loader as all of the hooks are defined
-		 * in that particular class.
-		 *
-		 * The Woomio_Loader will then create the relationship
-		 * between the defined hooks and the functions defined in this
-		 * class.
-		 */
 
 		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/woomio-admin.css', array(), $this->version, 'all' );
 		//wp_enqueue_style('tailwind-css', 'https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css');
@@ -79,18 +74,6 @@ class Woomio_Admin {
 	 */
 	public function enqueue_scripts($hook_suffix) {
 
-
-		/**
-		 * This function is provided for demonstration purposes only.
-		 *
-		 * An instance of this class should be passed to the run() function
-		 * defined in Woomio_Loader as all of the hooks are defined
-		 * in that particular class.
-		 *
-		 * The Woomio_Loader will then create the relationship
-		 * between the defined hooks and the functions defined in this
-		 * class.
-		 */
 
 		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/woomio-admin.js', array( 'jquery' ), $this->version, false );
 
@@ -139,141 +122,18 @@ class Woomio_Admin {
 	}
 
 	public function admin_tools_page_display(){
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/partials/submenu-display.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/partials/tools-display.php';
 	}
 
 	public function admin_settings_page_display(){
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/partials/module-display.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/partials/settings-display.php';
 	}
 
 
-	// Handle the form submission for the Settings page
-	public function woomio_handle_install_submit() {
 
-		if (isset($_POST['woomio_save_settings_webhook'])) {
-
-			// Verify nonce
-			if (!wp_verify_nonce($_POST['woomio_settings_nonce_webhook'], 'woomio_save_settings_webhook')) {
-				die('Security check failed');
-			}
-
-			// Sanitize and update the option
-			if (isset($_POST['wm-webhook'])) {
-				$webhook_url = sanitize_text_field($_POST['wm-webhook']);
-				update_option('_woomio_webhook_url', $webhook_url);
-
-				wp_redirect(add_query_arg('wm-settings-updated', 'true', wp_get_referer()));
-				exit;
-			}
-		}
-
-		if (isset($_POST['woomio_save_settings_modules']) ) {
-
-			// Verify nonce
-			if (!wp_verify_nonce($_POST['woomio_settings_nonce_modules'], 'woomio_save_settings_modules')) {
-				die('Security check failed');
-			}
-    
-			// Default values for checkboxes are false
-			$options = array(
-				'run_order_total' => false,
-				'top_product_types' => false,
-			);
-			
-			// If checkboxes are checked, update the value to true
-			if (isset($_POST['run_order_total'])) {
-				$options['run_order_total'] = true;
-			}
-			
-			if (isset($_POST['top_product_types'])) {
-				$options['top_product_types'] = true;
-			}
-			
-			// Update the options in the database
-			update_option('_woomio_module_settings', $options);
-			
-			// Redirect back with a success message
-			wp_redirect(add_query_arg('wm-settings-updated', 'true', wp_get_referer()));
-			exit;
-		}
-		
-
+	protected function get_webhook_url(){
+		return get_option('_woomio_webhook_url');
 	}
-
-	// Handle the form submission for the Tools page
-	public function woomio_handle_tools_submit() {
-
-		if (isset($_POST['woomio_save_rebuild_run_order_total'])) {
-
-			// Verify nonce
-			if (!wp_verify_nonce($_POST['woomio_run_order_total_nonce'], 'woomio_save_rebuild_run_order_total')) {
-				die('Security check failed');
-			}
-
-			 // Check if Button 1 was clicked
-			 if (isset($_POST['woomio_save_rebuild_run_order_total'])) {
-				$this->rebuild_users_running_order_total();
-			}
-
-			wp_redirect(add_query_arg('wm-settings-updated', 'true', wp_get_referer()));
-			exit;
-			
-		}
-
-		if (isset($_POST['woomio_save_csv_top_product_types'])) {
-
-			// Verify nonce
-			if (!wp_verify_nonce($_POST['woomio_tpt_csv_nonce'], 'woomio_save_csv_top_product_types')) {
-				die('Security check failed');
-			}
-
-			$this->export_csv();
-
-			wp_redirect(add_query_arg('wm-settings-updated', 'true', wp_get_referer()));
-			exit;
-			
-		}
-
-		if (isset($_POST['woomio_save_tools_top_product_types'])) {
-
-			// Verify nonce
-			if (!wp_verify_nonce($_POST['woomio_tpt_rebuild_nonce'], 'woomio_save_tools_top_product_types')) {
-				die('Security check failed');
-			}
-
-			$this->rebuild_user_data();
-
-			wp_redirect(add_query_arg('wm-settings-updated', 'true', wp_get_referer()));
-			exit;
-			
-		}
-
-	
-	}
-
-	public function woomio_handle_module_settings_submit() {
-
-		if (isset($_POST['woomio_module_tpt_settings'])) {
-
-			// Verify nonce
-			if (!wp_verify_nonce($_POST['woomio_settings_nonce_modules'], 'woomio_module_tpt_settings')) {
-				die('Security check failed');
-			}
-
-			// Sanitize and update the option
-			if (isset($_POST['woomio_tpt_options'])) {
-				$woomio_tpt_options = $_POST['woomio_tpt_options'];
-				update_option('_woomio_mod_tpt', $woomio_tpt_options);
-
-				wp_redirect(add_query_arg('wm-settings-updated', 'true', wp_get_referer()));
-				exit;
-			}
-
-			
-		}
-
-	}
-
 
 	
 	public function send_woomio_data_webhook( $order_id ){
@@ -281,61 +141,108 @@ class Woomio_Admin {
 		$order = wc_get_order( $order_id );
 		$user_id = $order->get_user_id();
 
-		// Checking a users order history can be slow so we first check to see if the order is free
-		// of notes, if it is it's very likely new and therefore we can skip the thorough check and do
-		// a basic increment on the order total
-		if($this->is_order_new_and_notes( $order_id )) {
-			// return true and therefore we do a quick increment
-			$this->update_order_totals_for_user( $user_id, $order );
-		} else {
-			// return false and therefore order notes exist, we do the long check
-			$this->rebuild_single_user_running_order_total( $user_id );
-		}
+		// Make sure order totals meta field is updated with latest values
+		// Order totals module
+		$this->prepare_Order_Totals_Module( $order_id, $user_id, $order );
+		// TPT module
+		$this->update_db_customer_data( $order_id );
+		// Next order date module
+		$this->prepare_Next_Order_Date_Module( $user_id, $order );
+
+		$tradeuser = $this->is_trade_user( $order_id );
 
 		// // Now call webhook to send data
-		$this->call_woomio_webhook( $user_id );
+		$this->call_woomio_webhook( $user_id, $order_id, $tradeuser );
 	}
 
 
-	public function call_woomio_webhook($user_id){
+	public function is_trade_user($order_id) {
 
-		$webhook_url = get_option('_woomio_webhook_url');
+			$order = wc_get_order($order_id);
+			$traderole = get_option('_woomio_traderole');
+
+			if ($order && $traderole) {
+				$user_id = $order->get_user_id();
+				$user = get_userdata($user_id);
+
+				if ($user && !empty($user->roles)) {
+					// For simplicity, let's assume the user only has one role. If a user can have multiple roles, you might want to handle it differently.
+					if (in_array($traderole, $user->roles)) {
+						return true;
+					}
+				}
+
+			}
+
+		return false;
+	}
+
+
+	public function call_woomio_webhook($user_id = false, $order_id, $tradeuser = false){
+
+		$webhook_url = $this->get_webhook_url();
 
 		if(!$webhook_url) : return false; endif;
 
-		$user_obj = get_user_by('id', $user_id);
+		if($user_id) : 
 
-		// 0. Initialize an empty $body array
-		$body = [
-			'user_id' => $user_id, 
-			'user_email' => $user_obj->user_email
-			];
+			$user_obj = get_user_by('id', $user_id);
 
-		
-				// 1 Order total added to body obj
-				$order_total = get_user_meta($user_id, 'woomio_order_total', true);
+			// 0. Initialize an empty $body array
+			$body = [
+				'user_id' => $user_id, 
+				'user_email' => $user_obj->user_email
+				];
 
-				if ($order_total) {
-					$body['running_order_total'] = $order_total;
-				}
-
-				// 2 TPT added to body obj
-				$user_top_types_unflat = $this->get_db_wp_user_data($user_id);
-				$user_top_types = $user_top_types_unflat[0] ?? [];
-
-				// Define the keys you're interested in . MAGIC VALUES
-				$keys = ['product_cat', 'type', 'range', 'occasion'];
+			if ($tradeuser) : $body['trade_user'] = 'Trade'; endif;
+			if ($order_id) : $body['order_id'] = $order_id; endif;
 
 
-				foreach ($keys as $key) {
-					for ($i = 1; $i <= 3; $i++) {
-						// If the key exists in $user_top_types and its corresponding index exists
-						if (isset($user_top_types[$key][$i-1])) {
-							// Add it to $body
-							$body["top_{$key}_{$i}"] = $user_top_types[$key][$i-1];
+				$modules = Woomio_Admin::get_all_modules();
+
+					if ($modules['order_totals']) : 
+			
+						$body['running_order_total'] = $this->get_woomio_order_total_meta($user_id);
+
+					endif;
+
+					if ($modules['top_product_types']) : 
+
+						$user_top_types = $this->get_woomio_top_pt_meta($user_id);
+
+						// Define the keys you're interested in . MAGIC VALUES
+						$keys = ['product_cat', 'type', 'range', 'occasion'];
+
+
+						foreach ($keys as $key) {
+							for ($i = 1; $i <= 3; $i++) {
+								// If the key exists in $user_top_types and its corresponding index exists
+								if (isset($user_top_types[$key][$i-1])) {
+									// Add it to $body
+									$body["top_{$key}_{$i}"] = $user_top_types[$key][$i-1];
+								}
+							}
 						}
-					}
-				}
+
+					endif;
+
+					if ($modules['next_order_date']) : 
+
+						$metaValueArray = get_user_meta($user_id, 'woomio_next_nudge_date', true);
+
+						if ($metaValueArray && is_array($metaValueArray)) {
+							$isoDate = $metaValueArray[0];
+							$date = new DateTime($isoDate);
+							$body['next_order_date'] = $date->format('Y-m-d');
+						} elseif ($metaValueArray && is_string($metaValueArray)) {
+							  $date = new DateTime($metaValueArray);
+    						  $body['next_order_date'] = $date->format('Y-m-d');
+						}
+
+
+					endif;
+
+		endif;
 
 
 		// // Set up the arguments for the POST request
@@ -365,43 +272,6 @@ class Woomio_Admin {
 	}
 
 
-
-	
-    // public function is_order_new_and_notes( $order_id ) {
-    //     // Get order notes
-    //     $notes = wc_get_order_notes( array( 'order_id' => $order_id ) );
-
-    //     // Loop through the notes and check if any of them indicate a status change
-    //     foreach ( $notes as $note ) {
-    //         if ( strpos( strtolower( $note->content ), 'status changed' ) !== false ) {
-    //             // The order status has been changed in the past
-    //             // Do something if needed
-    //             return false;
-    //         }
-    //     }
-
-    //     // The order is entirely new and has not had its status changed in the past
-    //     // Perform your actions for a new order here
-    //     return true;
-    // }
-
-	public function is_order_new_and_notes( $order_id ) {
-		// Get order notes
-		$notes = wc_get_order_notes( array( 'order_id' => $order_id ) );
-	
-		// Loop through the notes and check if any of them indicate a status change to completed
-		foreach ( $notes as $note ) {
-			// Check if the note indicates that the order status was changed to completed
-			if ( strpos( strtolower( $note->content ), 'status changed to completed' ) !== false ) {
-				// The order was set to completed in the past
-				return false;
-			}
-		}
-	
-		// The order has never been set to completed in the past
-		return true;
-	}
-	
 
 	
 

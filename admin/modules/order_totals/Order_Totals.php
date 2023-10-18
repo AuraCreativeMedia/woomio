@@ -1,6 +1,5 @@
 <?php 
 
-
 /**
  * Order Totals Module  
  *
@@ -101,6 +100,34 @@
 		// Update the user meta with the new total
 		update_user_meta($user_id, 'woomio_order_total', $new_total);
 	}
+
+	public function prepare_Order_Totals_Module( $order_id, $user_id, $order ) {
+		// Checking a users order history can be slow so we first check to see if the order is free
+		// of notes, if it is it's very likely new and therefore we can skip the thorough check and do
+		// a basic increment on the order total
+		if($this->is_order_new_and_notes( $order_id )) {
+			// return true and therefore we do a quick increment
+			$this->update_order_totals_for_user( $user_id, $order );
+		} else {
+			// return false and therefore order notes exist, we do the long check
+			$this->rebuild_single_user_running_order_total( $user_id );
+		}
+	}
+
+
+	public function get_woomio_order_total_meta($user_id){
+		// 1 Order total added to body obj
+		$order_total = get_user_meta($user_id, 'woomio_order_total', true);
+
+		if ($order_total) {
+			return $order_total;
+		} else {
+			return false;
+		}
+
+	}
+
+
 
  }
 

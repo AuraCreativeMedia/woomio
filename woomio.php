@@ -16,7 +16,7 @@
  * Plugin Name:       WooMio
  * Plugin URI:        https://digitalzest.co.uk
  * Description:       Connects WooCommerce to Pabbly and further along, to Growmio. Modular switches that enable you to choose what data to send for marketing support.
- * Version:           0.1.1
+ * Version:           0.0.9
  * Author:            Digital Zest
  * Author URI:        https://digitalzest.co.uk/
  * License:           GPL-2.0+
@@ -35,7 +35,8 @@ if ( ! defined( 'WPINC' ) ) {
  * Start at version 1.0.0 and use SemVer - https://semver.org
  * Rename this for your plugin and update it as you release new versions.
  */
-define( 'WOOMIO_VERSION', '1.0.1' );
+define( 'WOOMIO_VERSION', '0.0.9' );
+define( 'PLUGIN_ROOT', plugin_dir_path( __FILE__ ) );
 
 /**
  * The code that runs during plugin activation.
@@ -65,6 +66,31 @@ register_deactivation_hook( __FILE__, 'deactivate_woomio' );
 require plugin_dir_path( __FILE__ ) . 'includes/class-woomio.php';
 
 /**
+ * Updating Module from https://github.com/YahnisElsts/plugin-update-checker
+ */
+require plugin_dir_path( __FILE__ ) . 'plugin-update-checker/plugin-update-checker.php';
+use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
+
+
+/**
+ * A custom update checker for WordPress plugins. 
+ * Useful if you don't want to host your project in the official WP repository, 
+ * but would still like it to support automatic updates. 
+ *
+ * @since    1.0.0
+ */
+
+function run_woomio_update_checker() {
+	$myUpdateChecker = PucFactory::buildUpdateChecker(
+		'https://github.com/AuraCreativeMedia/woomio/',
+		__FILE__,
+		'woomio'
+	);
+}
+
+run_woomio_update_checker();
+
+/**
  * Begins execution of the plugin.
  *
  * Since everything within the plugin is registered via hooks,
@@ -81,15 +107,3 @@ function run_woomio() {
 }
 
 run_woomio();
-
-
-
-require 'plugin-update-checker/plugin-update-checker.php';
-use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
-
-$myUpdateChecker = PucFactory::buildUpdateChecker(
-	'https://github.com/AuraCreativeMedia/woomio/',
-	__FILE__,
-	'woomio'
-);
-
