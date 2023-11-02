@@ -195,7 +195,7 @@ class Woomio {
 
 		$this->loader->add_action( 'admin_init', $forms, 'woomio_handle_install_submit' );
 		$this->loader->add_action( 'admin_init', $forms, 'woomio_handle_tools_submit' );
-		$this->loader->add_action( 'admin_init', $forms, 'woomio_handle_module_settings_submit' );
+	//	$this->loader->add_action( 'admin_init', $forms, 'woomio_handle_module_settings_submit' );
 
 	}
 
