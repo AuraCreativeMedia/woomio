@@ -29,4 +29,10 @@
 	 * practising this, we should strive to set a better example in our own work.
 	 */
 
+	// jQuery(document).ready(function($) {
+	// 	$('#woomio_new_release_products_date').datepicker({
+	// 		dateFormat : 'mm/dd/yy'
+	// 	});
+	// });
+
 })( jQuery );

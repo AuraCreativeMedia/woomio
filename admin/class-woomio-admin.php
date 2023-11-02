@@ -22,6 +22,7 @@
  */
 
 
+
 require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/modules/Module_Config.php';
 
 require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/modules/order_totals/Order_Totals.php';
@@ -29,15 +30,13 @@ require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/modules/top_product
 require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/modules/next_order_date/Next_Order_Date.php';
 require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/modules/new_release_products/New_Release_Products.php';
 
-require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/common/Form_Handlers.php';
 require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/common/Utility_Functions.php';
 
 
 
 class Woomio_Admin {
 
-	use Order_Totals_Module, Top_Products_Module, Next_Order_Date, New_Release_Module,
-	Form_Handlers, Utility_Functions, Module_Config;
+	use Order_Totals_Module, Top_Products_Module, Next_Order_Date, New_Release_Module, Utility_Functions, Module_Config;
 
 	private $plugin_name;
 	private $version;
@@ -46,8 +45,8 @@ class Woomio_Admin {
 
 		$this->plugin_name = $plugin_name;
 		$this->version = $version;
-
 	}
+
 
 
 	/**
@@ -118,22 +117,22 @@ class Woomio_Admin {
 	}
 
 	public function admin_page_display(){ 
+		$page_title = 'Dashboard';
 	    require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/partials/woomio-admin-display.php';
 	}
 
 	public function admin_tools_page_display(){
+		$page_title = 'Tools';
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/partials/tools-display.php';
 	}
 
 	public function admin_settings_page_display(){
+		$page_title = 'Module Settings';
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/partials/settings-display.php';
 	}
 
 
 
-	protected function get_webhook_url(){
-		return get_option('_woomio_webhook_url');
-	}
 
 	
 	public function send_woomio_data_webhook( $order_id ){
@@ -156,31 +155,13 @@ class Woomio_Admin {
 	}
 
 
-	public function is_trade_user($order_id) {
-
-			$order = wc_get_order($order_id);
-			$traderole = get_option('_woomio_traderole');
-
-			if ($order && $traderole) {
-				$user_id = $order->get_user_id();
-				$user = get_userdata($user_id);
-
-				if ($user && !empty($user->roles)) {
-					// For simplicity, let's assume the user only has one role. If a user can have multiple roles, you might want to handle it differently.
-					if (in_array($traderole, $user->roles)) {
-						return true;
-					}
-				}
-
-			}
-
-		return false;
-	}
-
+	
 
 	public function call_woomio_webhook($user_id = false, $order_id, $tradeuser = false){
 
-		$webhook_url = $this->get_webhook_url();
+		$webhooks = new Woomio_Webhooks($this->plugin_name, $this->version);
+
+		$webhook_url = $webhooks->get_webhook_url('general');
 
 		if(!$webhook_url) : return false; endif;
 

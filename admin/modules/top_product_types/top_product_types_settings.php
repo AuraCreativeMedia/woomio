@@ -1,7 +1,7 @@
 
 
 
-<h2>Top Product Types</h2>
+
 
 <form method="post" action="" class="mb-12">
 
@@ -9,7 +9,7 @@
 
     <table class="form-table">
     <tr valign="top" class="bg-gray-100">
-        <th scope="row" class="p-4 text-left text-gray-700 font-semibold">Please map your website taxonomies to the ones Woomio expects. Or leave empty.</th>
+        <th scope="row" class="p-4 text-left text-gray-700 font-semibold" style="padding-left: 20px!important;">Please map your website taxonomies to the ones Woomio expects. Or leave empty.</th>
     </tr>
     <tr valign="top" class="bg-gray-100">
        

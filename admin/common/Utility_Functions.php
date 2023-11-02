@@ -57,18 +57,27 @@
 	}
 
 	
-	// public static function get_enabled_modules(){
+	public function is_trade_user($order_id) {
 
-	// 	$modules = get_option('_woomio_module_settings', array(
-	// 		'order_totals' => false,
-    //     	'top_product_types' => false,
-    //     	'next_order_date' => false,
-	// 		'new_release_products' => false,
-    // 	));
+		$order = wc_get_order($order_id);
+		$traderole = get_option('_woomio_traderole');
 
-	// 	return $modules;
+		if ($order && $traderole) {
+			$user_id = $order->get_user_id();
+			$user = get_userdata($user_id);
 
-	// }
+			if ($user && !empty($user->roles)) {
+				// For simplicity, let's assume the user only has one role. If a user can have multiple roles, you might want to handle it differently.
+				if (in_array($traderole, $user->roles)) {
+					return true;
+				}
+			}
+
+		}
+
+		return false;
+	}
+
 
 
 
@@ -98,18 +107,40 @@
 					
 					// Use the folder name as the module name
 					$moduleName = $folder->getFilename();
-					
+					$moduleDisplayName = self::get_module_nicename($moduleName);
+		
 					// Construct path to *_settings.php file within each module folder
 					$typeFilePath = $modulesPath . $moduleName . '/' . $moduleName . '_' . $type . '.php';
 					
 					// Check if the module is enabled and the *_settings.php file exists, then include it
-					if(self::check_module_status($moduleName) && file_exists($typeFilePath)){
-						include($typeFilePath);
+					if(self::check_module_status($moduleName) && file_exists($typeFilePath) && filesize($typeFilePath) > 0){
+						// Pass $typeFilePath, $moduleDisplayName down the chain
+						include( plugin_dir_path( __FILE__ ) . '../partials/components/module-container.php' );
 					}
 				}
 			}
 		}
 	}
+
+
+	
+
+	public static function get_module_nicename($slug){
+
+		$modules = self::get_module_meta();
+
+		foreach($modules as $module){
+			if($module['slug'] == $slug){
+			
+				return $module['title'];
+			}
+		}
+
+		return false;
+
+	}
+
+	
 	
 	
  }

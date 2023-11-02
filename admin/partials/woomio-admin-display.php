@@ -18,7 +18,10 @@
 <?php
 
     /* Handle submit */ 
-    $this->woomio_handle_install_submit();
+    $forms = new Woomio_Forms( $plugin_name, $version );
+    $webhooks = new Woomio_Webhooks($this->plugin_name, $this->version);
+
+    $forms->woomio_handle_install_submit();
 
     /* Return notice on successful submission */ 
     if (isset($_GET['wm-settings-updated']) && $_GET['wm-settings-updated'] == 'true') {
@@ -35,7 +38,7 @@
 
     $traderole = get_option('_woomio_traderole');
 
-    var_dump( $this->get_latest_products());
+
 
 ?>
 
@@ -51,17 +54,27 @@
          <!-- Nonce field -->
         <?php wp_nonce_field('woomio_save_settings_webhook', 'woomio_settings_nonce_webhook'); ?>
 
-        <div class="pt-20 space-y-6">
+        <div class="pt-2 space-y-6">
             <div class="border-b border-gray-900/10 pb-6">
                 <h2 class="text-base font-semibold leading-7 text-gray-900">Installation</h2>
-                <p class="mt-1 text-sm leading-6 text-gray-600">Required: Add a Webhook URL to push data</p>
+                <p class="mt-1 text-sm leading-6 text-gray-600">Add Webhook URL's to push data to Growmio</p>
 
-                <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
-                    <div class="sm:col-span-4">
-                        <label for="wm-webhook" class="block text-sm font-medium leading-6 text-gray-900">Webhook URL</label>
+                <div class="mt-10 grid grid-cols-2 gap-x-6 gap-y-8 sm:grid-cols-8">
+                    <div class="sm:col-span-2">
+                        <label for="wm-webhook" class="block text-sm font-medium leading-6 text-gray-900">Contacts - Webhook URL</label>
+                        <small>General webhook for a range of functions - required by Woomio</small>
                         <div class="mt-2">
                             <div class="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
-                                <input type="text" name="wm-webhook" id="wm-webhook" value="<?php echo esc_attr(get_option('_woomio_webhook_url')); ?>" class="block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6" placeholder="">
+                                <input type="text" name="wm-webhook" id="wm-webhook" value="<?php echo esc_attr($webhooks->get_webhook_url('general')); ?>" class="block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6" placeholder="">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label for="wm-webhook-nrp" class="block text-sm font-medium leading-6 text-gray-900">Newly Released Products - Webhook URL</label>
+                        <small>Webhook used by module - Optional</small>
+                        <div class="mt-2">
+                            <div class="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
+                                <input type="text" name="wm-webhook-nrp" id="wm-webhook-nrp" value="<?php echo esc_attr($webhooks->get_webhook_url('new_release_products')); ?>" class="block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6" placeholder="">
                             </div>
                         </div>
                     </div>
@@ -161,5 +174,6 @@
            
         </form>
 
-</div>
+        <?php include_once( 'components/admin-footer.php' ); ?>
 
+</div>

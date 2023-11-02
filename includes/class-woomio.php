@@ -77,6 +77,9 @@ class Woomio {
 		$this->load_dependencies();
 		$this->set_locale();
 		$this->define_admin_hooks();
+		$this->define_form_hooks();
+		$this->define_cron_hooks();
+		$this->define_webhook_hooks();
 		$this->define_public_hooks();
 
 	}
@@ -115,6 +118,14 @@ class Woomio {
 		 * The class responsible for defining all actions that occur in the admin area.
 		 */
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-woomio-admin.php';
+
+
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-woomio-forms.php';
+
+
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-woomio-cron.php';
+
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-woomio-webhooks.php';
 
 		/**
 		 * The class responsible for defining all actions that occur in the public-facing
@@ -163,13 +174,51 @@ class Woomio {
 		$this->loader->add_action( 'admin_menu', $plugin_admin, 'woomio_tools_submenu_page' );
 		$this->loader->add_action( 'admin_menu', $plugin_admin, 'woomio_settings_submenu_page' );
 
-		$this->loader->add_action( 'admin_init', $plugin_admin, 'woomio_handle_install_submit' );
-		$this->loader->add_action( 'admin_init', $plugin_admin, 'woomio_handle_tools_submit' );
-		$this->loader->add_action( 'admin_init', $plugin_admin, 'woomio_handle_module_settings_submit' );
+
 
 		// Using Order status completed which may not be the best since you can replicate it again and again by switching off and on
 		$this->loader->add_action( 'woocommerce_order_status_completed', $plugin_admin, 'send_woomio_data_webhook' );
 
+
+	}
+
+	/**
+	 * Register all of the hooks related to the admin Forms functionality
+	 * of the plugin.
+	 *
+	 * @since    1.0.0
+	 * @access   private
+	 */
+	private function define_form_hooks() {
+
+		$forms = new Woomio_Forms( $this->get_plugin_name(), $this->get_version() );
+
+		$this->loader->add_action( 'admin_init', $forms, 'woomio_handle_install_submit' );
+		$this->loader->add_action( 'admin_init', $forms, 'woomio_handle_tools_submit' );
+		$this->loader->add_action( 'admin_init', $forms, 'woomio_handle_module_settings_submit' );
+
+	}
+
+	/**
+	 * Register all of the hooks related to the admin Forms functionality
+	 * of the plugin.
+	 *
+	 * @since    1.0.0
+	 * @access   private
+	 */
+	private function define_cron_hooks() {
+
+		$cron = new Woomio_Cron( $this->get_plugin_name(), $this->get_version() );
+
+		$this->loader->add_action( 'plugins_loaded', $cron, 'instantiate_module_crons' );
+
+	}
+
+	private function define_webhook_hooks() {
+
+		$webhooks = new Woomio_Webhooks( $this->get_plugin_name(), $this->get_version() );
+
+	//	$this->loader->add_action( 'plugins_loaded', $cron, 'instantiate_module_crons' );
 
 	}
 

@@ -16,6 +16,8 @@
 
 trait Module_Config {
 
+    
+
     public static function get_module_meta() {
         return array(
             'order_totals' => array(
@@ -34,9 +36,9 @@ trait Module_Config {
                 'description' => 'Set date in the future so that once date hits email is sent to user to remind them to order again.',
             ),
             'new_release_products' => array(
-                'title' => 'Newly Released Products (Under Construction)',
+                'title' => 'Newly Released Products',
                 'slug' => 'new_release_products',
-                'description' => 'Send the number of newly released products to Growmio',
+                'description' => 'Send the number of newly released products to Growmio. (* Requires additional Webhook in Pabbly and Growmio)',
             ),
         );
     }

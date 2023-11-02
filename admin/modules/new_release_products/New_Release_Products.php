@@ -12,8 +12,12 @@
  * 
  */
 
-trait New_Release_Module {
 
+
+trait New_Release_Module {
+    
+
+    // For getting the INT value of the new products
     public function get_latest_products(){
 
         $args = array(
@@ -32,10 +36,32 @@ trait New_Release_Module {
         $query = new WP_Query($args);
         
         // Count of products published in the last 7 days
-        $count_new_products = $query->post_count;
+        $new_products = $query->post_count;
         
-        return $count_new_products;  // Outputs the count of new products
+        return $new_products;  // Outputs the count of new products
         
     }
+
+    // Update the new products count in the DB
+
+    public function update_new_products_count(){
+
+        $new_products = $this->get_latest_products();
+
+        update_option( '_woomio_mod_new_prod', $new_products );
+
+    }
+
+    public function get_new_products_count(){
+
+        $new_products = get_option( '_woomio_mod_new_prod' );
+
+        return $new_products;
+
+    }
+
+    // CRON job for when to run the product check and 
+
+
 
 }

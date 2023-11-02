@@ -18,7 +18,10 @@
 <?php
 
     /* Handle submit */ 
-    $this->woomio_handle_tools_submit();
+
+    $forms = new Woomio_Forms( $plugin_name, $version );
+
+    $forms->woomio_handle_tools_submit();
 
     /* Return notice on successful submission */ 
     if (isset($_GET['wm-settings-updated']) && $_GET['wm-settings-updated'] == 'true') {
@@ -37,8 +40,8 @@
         include_once( 'components/admin-header.php' );
     ?>
 
-    <h1>Tools</h1>
-    <p class="mt-1 text-sm leading-6 text-gray-600">I recommend running the rebuild functions on first installing the plugin as they will ensure Growmio gets the correct values. However be warned that they are intensive operations on larger websites so be patient.</p>
+    
+    <p class="mb-12 text-sm leading-6 text-gray-600">I recommend running the rebuild functions on first installing the plugin as they will ensure Growmio gets the correct values. However be warned that they are intensive operations on larger websites so be patient.</p>
     <?php 
 
 
@@ -46,8 +49,9 @@
 
     Woomio_Admin::showModulesHTML('tools');
     
+    
 
 ?>  
-
-
+ 
+    <?php include_once( 'components/admin-footer.php' ); ?>
 </div>

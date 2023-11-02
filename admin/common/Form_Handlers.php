@@ -13,152 +13,97 @@
 
  trait Form_Handlers {
 
- 	// Handle the form submission for the Settings page
-     public function woomio_handle_install_submit() {
+	
 
-		if (isset($_POST['woomio_save_settings_webhook'])) {
+	protected function verify_nonce($action) {
+        return isset(self::NONCE_FIELDS[$action]) && wp_verify_nonce($_POST[self::NONCE_FIELDS[$action]], $action);
+    }
 
-			// Verify nonce
-			if (!wp_verify_nonce($_POST['woomio_settings_nonce_webhook'], 'woomio_save_settings_webhook')) {
-				die('Security check failed');
-			}
+	protected function redirect_settings_updated() {
+        wp_redirect(add_query_arg('wm-settings-updated', 'true', wp_get_referer()));
+        exit;
+    }
 
-			// Sanitize and update the option
-			if (isset($_POST['wm-webhook'])) {
-				$webhook_url = sanitize_text_field($_POST['wm-webhook']);
-				update_option('_woomio_webhook_url', $webhook_url);
-			}
-			// Sanitize and update the option
-			if (isset($_POST['wm-traderole'])) {
-				$traderole = sanitize_text_field($_POST['wm-traderole']);
-				update_option('_woomio_traderole', $traderole);
-			}
+	protected function update_option($key, $value) {
+        $sanitized_value = is_string($value) ? sanitize_text_field($value) : $value; // Assuming the value can only be string or array.
+        update_option($key, $sanitized_value);
+    }
 
-			wp_redirect(add_query_arg('wm-settings-updated', 'true', wp_get_referer()));
-			exit;
-		}
 
-		if (isset($_POST['woomio_save_settings_modules']) ) {
+	protected function save_webhook_settings() {
+        foreach (self::OPTION_KEYS_FH as $field => $option_key) {
+            if (isset($_POST[$field])) {
+                $sanitized_value = sanitize_text_field($_POST[$field]);
+                update_option($option_key, $sanitized_value);
+            }
+        }
+    }
 
-			// Verify nonce
-			if (!wp_verify_nonce($_POST['woomio_settings_nonce_modules'], 'woomio_save_settings_modules')) {
-				die('Security check failed');
-			}
+
+	public function woomio_handle_install_submit() {
+
+        if (isset($_POST['woomio_save_settings_webhook']) && $this->verify_nonce('woomio_save_settings_webhook')) {
+            $this->save_webhook_settings();
+            $this->redirect_settings_updated();
+        }
+
+        if (isset($_POST['woomio_save_settings_modules']) && $this->verify_nonce('woomio_save_settings_modules')) {
+            $this->save_module_settings();
+            $this->redirect_settings_updated();
+        }
+    }
+
+	public function woomio_handle_tools_submit() {
+        foreach (self::POST_HANDLERS as $post_field => $handler) {
+            if (isset($_POST[$post_field]) && $this->verify_nonce($post_field)) {
+                $this->$handler();
+                $this->redirect_settings_updated();
+            }
+        }
+    }
+
+	public function save_module_settings() {
+        $modules = Woomio_Admin::get_all_modules();
+        foreach ($modules as $module_name => $is_enabled) {
+            $modules[$module_name] = isset($_POST[$module_name]);
+        }
+        update_option('_woomio_module_settings', $modules);
+    }
+
+
+	public function save_tpt_module_settings() {
+        if (isset($_POST['woomio_tpt_options'])) {
+            $value = $_POST['woomio_tpt_options'];
+            $this->update_option('_woomio_mod_tpt', $value);
+        }
+    }
+
+	public function save_next_date_module_settings() {
+        if (isset($_POST['woomio_next_date_options'])) {
+            $sanitized_value = sanitize_text_field($_POST['woomio_next_date_options']);
+            $this->update_option('_woomio_mod_next_date', $sanitized_value);
+        }
+    }
+
+
+    public function save_new_release_products_module_settings() {
+        if (isset($_POST['woomio_new_release_products_page'])) {
+            $sanitized_value = sanitize_text_field($_POST['woomio_new_release_products_page']);
+            $this->update_option('_woomio_mod_new_release_prod_page', $sanitized_value);
+        }
+        if (isset($_POST['woomio_next_date_dow'])) {
+            $sanitized_value = sanitize_text_field($_POST['woomio_next_date_dow']);
+            $this->update_option('_woomio_mod_new_prod_dow', $sanitized_value);
+        }
+    }
+
     
 
-			$modules = Woomio_Admin::get_all_modules();
-			
-			foreach($modules as $module_name => $is_enabled) {
-				// If checkbox is checked, update the value to true
-				if (isset($_POST[$module_name])) {
-					$modules[$module_name] = true;
-				} else {
-					$modules[$module_name] = false; // If checkbox is unchecked, it's necessary to set it as false
-				}
-			}
+	
 
-			// Update the options in the database
-			update_option('_woomio_module_settings', $modules);
-			
-			// Redirect back with a success message
-			wp_redirect(add_query_arg('wm-settings-updated', 'true', wp_get_referer()));
-			exit;
-		}
-		
-
-	}
-
-	// Handle the form submission for the Tools page
-	public function woomio_handle_tools_submit() {
-
-		if (isset($_POST['woomio_save_rebuild_run_order_total'])) {
-
-			// Verify nonce
-			if (!wp_verify_nonce($_POST['woomio_run_order_total_nonce'], 'woomio_save_rebuild_run_order_total')) {
-				die('Security check failed');
-			}
-
-			 // Check if Button 1 was clicked
-			 if (isset($_POST['woomio_save_rebuild_run_order_total'])) {
-				$this->rebuild_users_running_order_total();
-			}
-
-			wp_redirect(add_query_arg('wm-settings-updated', 'true', wp_get_referer()));
-			exit;
-			
-		}
-
-		if (isset($_POST['woomio_save_csv_top_product_types'])) {
-
-			// Verify nonce
-			if (!wp_verify_nonce($_POST['woomio_tpt_csv_nonce'], 'woomio_save_csv_top_product_types')) {
-				die('Security check failed');
-			}
-
-			$this->export_csv();
-
-			wp_redirect(add_query_arg('wm-settings-updated', 'true', wp_get_referer()));
-			exit;
-			
-		}
-
-		if (isset($_POST['woomio_save_tools_top_product_types'])) {
-
-			// Verify nonce
-			if (!wp_verify_nonce($_POST['woomio_tpt_rebuild_nonce'], 'woomio_save_tools_top_product_types')) {
-				die('Security check failed');
-			}
-
-			$this->rebuild_user_data();
-
-			wp_redirect(add_query_arg('wm-settings-updated', 'true', wp_get_referer()));
-			exit;
-			
-		}
 
 	
-	}
 
-	public function woomio_handle_module_settings_submit() {
-
-		if (isset($_POST['woomio_module_tpt_settings'])) {
-
-			// Verify nonce
-			if (!wp_verify_nonce($_POST['woomio_settings_nonce_modules'], 'woomio_module_tpt_settings')) {
-				die('Security check failed');
-			}
-
-			// Sanitize and update the option
-			if (isset($_POST['woomio_tpt_options'])) {
-				$woomio_tpt_options = $_POST['woomio_tpt_options'];
-				update_option('_woomio_mod_tpt', $woomio_tpt_options);
-
-				wp_redirect(add_query_arg('wm-settings-updated', 'true', wp_get_referer()));
-				exit;
-			}
-
-			
-		}
-
-		if (isset($_POST['woomio_module_next_date_settings'])) {
-
-			// Verify nonce
-			if (!wp_verify_nonce($_POST['woomio_settings_nonce_modules'], 'woomio_module_next_date_settings')) {
-				die('Security check failed');
-			}
-
-			// Sanitize and update the option
-			if (isset($_POST['woomio_next_date_options'])) {
-				$woomio_next_date_options = $_POST['woomio_next_date_options'];
-				update_option('_woomio_mod_next_date', $woomio_next_date_options);
-
-				wp_redirect(add_query_arg('wm-settings-updated', 'true', wp_get_referer()));
-				exit;
-			}
-
-			
-		}
-
-	}
+	
 
 }

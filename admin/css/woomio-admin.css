@@ -5,6 +5,18 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100;400;500;700&display=swap');
 
+.toplevel_page_woomio-options #wpcontent,
+.woomio_page_woomio-settings #wpcontent,
+.woomio_page_woomio-tools #wpcontent {
+    padding-left: 0;
+}
+
+.wrap.woomio-admin-page {
+    margin-top: 0;
+    margin-left: 0;
+    margin-right: 0;
+}
+
 #wpbody-content .woomio-admin-page h1, 
 #wpbody-content .woomio-admin-page h2, 
 #wpbody-content .woomio-admin-page h3, 
@@ -17,9 +29,15 @@
     font-family: 'Outfit', 'Open Sans', sans-serif;
 }
 
-#wpbody-content .woomio-admin-page h1, #wpbody-content .woomio-admin-page h2, #wpbody-content .woomio-admin-page h3, #wpbody-content .woomio-admin-page h4  {
+#wpbody-content .woomio-admin-page h1 {
     font-weight: 700;
-    font-size: 26px;
-    color: #7F54B3;
+    font-size: 45px;
+    color: #62d0a1;
+}
+
+#wpbody-content .woomio-admin-page h2, #wpbody-content .woomio-admin-page h3, #wpbody-content .woomio-admin-page h4  {
+    font-weight: 700;
+    font-size: 22px;
+    color: #1f2937;
 }
 

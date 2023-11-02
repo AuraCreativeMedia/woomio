@@ -22,6 +22,9 @@ Connects WooCommerce to Pabbly and further along, to Growmio. Modular switches t
 
 == Changelog ==
 
+= 1.0.1 2023-11-02 =
+* 1st Release Version - Prelim. tests completed. Basic branding completed
+
 = 0.1.1 2023-10-18 =
 * 2nd Development Version - Basic testing, refinement of functions/layouts
 

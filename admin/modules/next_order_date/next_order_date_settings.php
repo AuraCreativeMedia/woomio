@@ -1,5 +1,5 @@
 
-<h2>Next Order Date</h2>
+
 <p>When a user makes an order, the selected date below will act as a reminder to say 'The last time you ordered was X days ago'.</p>
 <form method="post" action="">
 

@@ -17,8 +17,13 @@
 
 <?php
 
+
+
+
+    $forms = new Woomio_Forms( $plugin_name, $version );
+
     /* Handle submit */ 
-    $this->woomio_handle_module_settings_submit();
+    $forms->save_tpt_module_settings();
 
     /* Return notice on successful submission */ 
     if (isset($_GET['wm-settings-updated']) && $_GET['wm-settings-updated'] == 'true') {
@@ -34,17 +39,16 @@
         include_once( 'components/admin-header.php' );
     ?>
 
-    <h1>Settings - Modules</h1>
+  
 
-    <?php 
+        <?php 
 
-        // Utility_Functions
+            // Utility_Functions
 
-        Woomio_Admin::showModulesHTML('settings');
+            Woomio_Admin::showModulesHTML('settings');
 
-?>
+    ?>
  
 
-
-
+    <?php include_once( 'components/admin-footer.php' ); ?>
 </div>
