@@ -18,9 +18,7 @@
 <?php
 
 
-
-
-    $forms = new Woomio_Forms( $plugin_name, $version );
+    $forms = new Woomio_Forms();
 
     /* Handle submit */ 
     $forms->save_tpt_module_settings();
@@ -39,12 +37,9 @@
         include_once( 'components/admin-header.php' );
     ?>
 
-  
-
         <?php 
 
             // Utility_Functions
-
             Woomio_Admin::showModulesHTML('settings');
 
     ?>

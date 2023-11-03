@@ -24,12 +24,14 @@ class Woomio_Forms {
 	private $plugin_name;
 	private $version;
 
-	public function __construct( $plugin_name, $version ) {
+	
+	public function __construct( $plugin_name = PLUGIN_NAME, $version = WOOMIO_VERSION) {
 
 		$this->plugin_name = $plugin_name;
 		$this->version = $version;
-
 	}
+
+	
 
 	// TRAITs cannot have constants, these belong to FORM_HANDLERS
 	const OPTION_KEYS_FH = [

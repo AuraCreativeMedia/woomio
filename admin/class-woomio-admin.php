@@ -31,22 +31,24 @@ require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/modules/next_order_
 require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/modules/new_release_products/New_Release_Products.php';
 
 require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/common/Utility_Functions.php';
+require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/common/Log_Functions.php';
 
 
 
 class Woomio_Admin {
 
-	use Order_Totals_Module, Top_Products_Module, Next_Order_Date, New_Release_Module, Utility_Functions, Module_Config;
+	use Order_Totals_Module, Top_Products_Module, Next_Order_Date, New_Release_Module, Utility_Functions, Log_Functions, Module_Config;
 
 	private $plugin_name;
 	private $version;
 
-	public function __construct( $plugin_name, $version ) {
+	public function __construct( $plugin_name = PLUGIN_NAME, $version = WOOMIO_VERSION) {
 
 		$this->plugin_name = $plugin_name;
 		$this->version = $version;
 	}
 
+	
 
 
 	/**
@@ -155,9 +157,66 @@ class Woomio_Admin {
 	}
 
 
-	
+
+
+	public function retrieve_general_data_webhook( &$body, $user_id  ){
+
+		$modules = Woomio_Admin::get_all_modules();
+
+		if ($modules['order_totals']) : 
+
+			$body['running_order_total'] = $this->get_woomio_order_total_meta($user_id);
+
+		endif;
+
+		if ($modules['top_product_types']) : 
+
+			$user_top_types = $this->get_woomio_top_pt_meta($user_id);
+
+			// Define the keys you're interested in . MAGIC VALUES
+			$keys = ['product_cat', 'type', 'range', 'occasion'];
+
+
+			foreach ($keys as $key) {
+				for ($i = 1; $i <= 3; $i++) {
+					// If the key exists in $user_top_types and its corresponding index exists
+					if (isset($user_top_types[$key][$i-1])) {
+						// Add it to $body
+						$body["top_{$key}_{$i}"] = $user_top_types[$key][$i-1];
+					}
+				}
+			}
+
+		endif;
+
+		if ($modules['next_order_date']) : 
+
+			$metaValueArray = get_user_meta($user_id, 'woomio_next_nudge_date', true);
+
+			if ($metaValueArray && is_array($metaValueArray)) {
+				$isoDate = $metaValueArray[0];
+				$date = new DateTime($isoDate);
+				$body['next_order_date'] = $date->format('Y-m-d');
+			} elseif ($metaValueArray && is_string($metaValueArray)) {
+				$date = new DateTime($metaValueArray);
+				$body['next_order_date'] = $date->format('Y-m-d');
+			}
+
+
+		endif;
+	}
+
+	public function add_key_value_to_body_if_set ( &$body, $condition, $key, $value){
+		if ($condition) {
+			$body[$key] = $value;
+		}
+	}
+
+
 
 	public function call_woomio_webhook($user_id = false, $order_id, $tradeuser = false){
+
+		$body = [];  // Initialize $body
 
 		$webhooks = new Woomio_Webhooks($this->plugin_name, $this->version);
 
@@ -169,86 +228,26 @@ class Woomio_Admin {
 
 			$user_obj = get_user_by('id', $user_id);
 
+			if(!$user_obj) {
+				return;
+			}
+
 			// 0. Initialize an empty $body array
 			$body = [
 				'user_id' => $user_id, 
 				'user_email' => $user_obj->user_email
 				];
 
-			if ($tradeuser) : $body['trade_user'] = 'Trade'; endif;
-			if ($order_id) : $body['order_id'] = $order_id; endif;
 
+			$this->add_key_value_to_body_if_set ( $body, $tradeuser, 'trade_user', 'Trade' );
+			$this->add_key_value_to_body_if_set ( $body, !is_null($order_id), 'order_id', $order_id );
 
-				$modules = Woomio_Admin::get_all_modules();
-
-					if ($modules['order_totals']) : 
-			
-						$body['running_order_total'] = $this->get_woomio_order_total_meta($user_id);
-
-					endif;
-
-					if ($modules['top_product_types']) : 
-
-						$user_top_types = $this->get_woomio_top_pt_meta($user_id);
-
-						// Define the keys you're interested in . MAGIC VALUES
-						$keys = ['product_cat', 'type', 'range', 'occasion'];
-
-
-						foreach ($keys as $key) {
-							for ($i = 1; $i <= 3; $i++) {
-								// If the key exists in $user_top_types and its corresponding index exists
-								if (isset($user_top_types[$key][$i-1])) {
-									// Add it to $body
-									$body["top_{$key}_{$i}"] = $user_top_types[$key][$i-1];
-								}
-							}
-						}
-
-					endif;
-
-					if ($modules['next_order_date']) : 
-
-						$metaValueArray = get_user_meta($user_id, 'woomio_next_nudge_date', true);
-
-						if ($metaValueArray && is_array($metaValueArray)) {
-							$isoDate = $metaValueArray[0];
-							$date = new DateTime($isoDate);
-							$body['next_order_date'] = $date->format('Y-m-d');
-						} elseif ($metaValueArray && is_string($metaValueArray)) {
-							  $date = new DateTime($metaValueArray);
-    						  $body['next_order_date'] = $date->format('Y-m-d');
-						}
-
-
-					endif;
+			// Get Module data for the $body
+			$this->retrieve_general_data_webhook( $body, $user_id);
 
 		endif;
 
-
-		// // Set up the arguments for the POST request
-		$args = array(
-			'body'        => $body,
-			'timeout'     => '5',
-			'redirection' => '5',
-			'httpversion' => '1.0',
-			'blocking'    => true,
-			'headers'     => array(),
-			'cookies'     => array(),
-		);
-
-		// Make the POST request
-		$response = wp_remote_post( $webhook_url, $args );
-
-		// Check for errors
-		if ( is_wp_error( $response ) ) {
-			$error_message = $response->get_error_message();
-			echo "Something went wrong: $error_message";
-		} else {
-			echo 'Response:<pre>';
-			print_r( $response );
-			echo '</pre>';
-		}
+        $response = $webhooks->post_webhook_data('general', $body);
 
 	}
 

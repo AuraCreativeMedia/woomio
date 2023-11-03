@@ -14,13 +14,20 @@ require_once plugin_dir_path(dirname(__FILE__)) . 'admin/modules/Module_Config.p
 
 class Woomio_Cron {
 
-    use Module_Config;
+    private $plugin_name;
+	private $version;
 
-    public function __construct() {
+    public function __construct( $plugin_name = PLUGIN_NAME, $version = WOOMIO_VERSION) {
 
+		$this->plugin_name = $plugin_name;
+		$this->version = $version;
         add_action('init', array($this, 'schedule_cron_jobs'));
         add_filter('cron_schedules', array($this, 'add_daily_cron_schedules'));
-    }
+	}
+
+
+    use Module_Config;
+
 
     protected function get_cron_interval() {
         // Default to daily

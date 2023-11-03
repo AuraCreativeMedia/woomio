@@ -19,7 +19,7 @@
 
     /* Handle submit */ 
 
-    $forms = new Woomio_Forms( $plugin_name, $version );
+    $forms = new Woomio_Forms();
 
     $forms->woomio_handle_tools_submit();
 
@@ -41,7 +41,7 @@
     ?>
 
     
-    <p class="mb-12 text-sm leading-6 text-gray-600">I recommend running the rebuild functions on first installing the plugin as they will ensure Growmio gets the correct values. However be warned that they are intensive operations on larger websites so be patient.</p>
+    <p class="woomio-pg-desc mb-6 bg-white p-6 text-lg leading-6 text-gray-600">I recommend running the rebuild functions on first installing the plugin as they will ensure Growmio gets the correct values. However be warned that they are intensive operations on larger websites so be patient.</p>
     <?php 
 
 

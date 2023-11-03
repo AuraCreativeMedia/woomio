@@ -15,7 +15,7 @@
  * Plugin Name:       WooMio
  * Plugin URI:        https://digitalzest.co.uk
  * Description:       Woomio sets up WooCommerce automations to elevate your Growmio account. Includes modular switches that enable you to choose what data to send for marketing triggers and data insights.
- * Version:           1.0.1
+ * Version:           1.1.0
  * Author:            Digital Zest
  * Author URI:        https://digitalzest.co.uk/
  * License:           GPL-2.0+
@@ -36,7 +36,8 @@ if ( ! defined( 'WPINC' ) ) {
  * Start at version 1.0.0 and use SemVer - https://semver.org
  * Rename this for your plugin and update it as you release new versions.
  */
-define( 'WOOMIO_VERSION', '1.0.1' );
+define( 'WOOMIO_VERSION', '1.1.0' );
+define('PLUGIN_NAME', 'woomio');
 define( 'PLUGIN_ROOT', plugin_dir_path( __FILE__ ) );
 define( 'PLUGIN_ROOT_URI', plugin_dir_url( __FILE__ ) );
 

@@ -47,5 +47,5 @@
 
     <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900"><?php echo $page_title; ?></h1>
 
-    <div class="woomio-content px-12 py-8 bg-gray-200">
+    <div class="woomio-content px-8 py-8 bg-[#d8dee5]">
 

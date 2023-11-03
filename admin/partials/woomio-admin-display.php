@@ -18,8 +18,8 @@
 <?php
 
     /* Handle submit */ 
-    $forms = new Woomio_Forms( $plugin_name, $version );
-    $webhooks = new Woomio_Webhooks($this->plugin_name, $this->version);
+    $forms = new Woomio_Forms();
+    $webhooks = new Woomio_Webhooks();
 
     $forms->woomio_handle_install_submit();
 
@@ -38,11 +38,7 @@
 
     $traderole = get_option('_woomio_traderole');
 
-
-
 ?>
-
-
 
 
 <div class="wrap woomio-admin-page">
@@ -55,7 +51,7 @@
         <?php wp_nonce_field('woomio_save_settings_webhook', 'woomio_settings_nonce_webhook'); ?>
 
         <div class="pt-2 space-y-6">
-            <div class="border-b border-gray-900/10 pb-6">
+            <div class="bg-gray-100 p-6 border-b border-gray-900/10 pb-6">
                 <h2 class="text-base font-semibold leading-7 text-gray-900">Installation</h2>
                 <p class="mt-1 text-sm leading-6 text-gray-600">Add Webhook URL's to push data to Growmio</p>
 
@@ -86,7 +82,7 @@
                             <div class="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                                 <select name="wm-traderole" id="wm-traderole" class="block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6 max-w-max" style="max-width:100%;">
                                   <!-- Adding a "None" option -->
-                                  <option value="" <?php selected($selected, ''); ?>>None</option>
+                                  <option value="">None</option>
                                 <?php
                                     foreach ($editable_roles as $role_slug => $role_details) {
                                         $isSelected = ($traderole == $role_slug) ? 'selected' : '';
@@ -98,14 +94,15 @@
                         </div>
                     </div>
                 </div>
+                <?php 
+
+                    $submit_name = 'woomio_save_settings_webhook';
+                    include( PLUGIN_ROOT . 'admin/partials/components/form-button.php' ); 
+
+                ?>
             </div>
 
-            <?php 
-
-                $submit_name = 'woomio_save_settings_webhook';
-                include( PLUGIN_ROOT . 'admin/partials/components/form-button.php' ); 
-
-            ?>
+            
 
         
         </div>
@@ -115,7 +112,7 @@
 
         <?php wp_nonce_field('woomio_save_settings_modules', 'woomio_settings_nonce_modules'); ?>
             
-            <div class="border-b border-gray-900/10 pb-12 pt-20 space-y-6">
+            <div class="bg-gray-100 p-6 border-b border-gray-900/10 mb-6 pb-6">
                 <h2 class="text-base font-semibold leading-7 text-gray-900">Modules</h2>
                 <p class="mt-1 text-sm leading-6 text-gray-600">Select which Modules you'd like to use. You must ensure these are setup in Pabbly</p>
 
@@ -160,20 +157,51 @@
                     </fieldset>
                
                 </div>
-            </div>
-
-            
-
+                
             <?php 
 
                 $submit_name = 'woomio_save_settings_modules';
                 include( PLUGIN_ROOT . 'admin/partials/components/form-button.php' ); 
-            
-            ?>
 
+                ?>
+            </div>
            
         </form>
 
+        <div class="bg-gray-100 p-6 border-b border-gray-900/10 pb-6">
+                <h2 class="text-base font-semibold leading-7 text-gray-900">Webhook Logs</h2>
+                <p class="mt-1 text-sm leading-6 text-gray-600">Show's the latest webhook transactions. Find the entire log in /wp-uploads/woomio/</p>
+
+                <div class="mt-10 space-y-10">
+                   
+                <?php
+
+                    $upload_dir = wp_upload_dir();
+                    $log_file = $upload_dir['basedir'] . '/woomio-logs/webhook_logs.txt';
+
+                    // Read the file into an array
+                    $lines = file($log_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+
+                    // Get the last 100 lines
+                    $last_100_lines = array_slice($lines, -100);
+
+                    // Convert special characters to HTML entities and join the lines
+                    $output = implode("\n", array_map('htmlspecialchars', $last_100_lines));
+
+                    // Return the content wrapped in a <pre> tag
+                    $logs = '<textarea readonly style="width: 100%; height:250px; overflow-y: scroll;">' . $output . '</textarea>';
+
+                    echo $logs;
+
+                ?>
+               
+                </div>
+       
+        </div>
+
         <?php include_once( 'components/admin-footer.php' ); ?>
+
+
+
 
 </div>
