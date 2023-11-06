@@ -19,7 +19,7 @@ require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/common/Form_Handler
 
 class Woomio_Forms {
 
-    use Form_Handlers, Top_Products_Module, Next_Order_Date, New_Release_Module, Utility_Functions, Module_Config;
+    use Form_Handlers, Top_Products_Module, Next_Order_Date, New_Release_Module, Utility_Functions, Module_Config, Order_Totals_Module;
 
 	private $plugin_name;
 	private $version;
